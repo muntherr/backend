@@ -8,8 +8,8 @@ class Course(BaseModel):
     id: str = Field(None, alias="_id")
     courseName: str  
     instructor: str  
-    startDate: datetime  
-    endDate: datetime  
+    startDate: str  
+    endDate: str  
 
     def to_json(self):
         return jsonable_encoder(self, exclude_none=True)

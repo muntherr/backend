@@ -7,9 +7,8 @@ class Instructor(BaseModel):
     id: str = Field(None, alias="_id")
     firstName: str  
     lastName: str  
-    department: str  
-    phoneNumber: int  
-    courses: List[str]
+    phoneNumber: str  
+    courses: str
 
     def to_json(self):
         return jsonable_encoder(self, exclude_none=True)
