@@ -8,6 +8,7 @@ from models.instructor import Instructor
 from models.student import Students
 
 app = Flask(__name__)
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Courses routes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 
 # List all availabel courses info
 @app.route("/courses_Info", methods=['GET'])
@@ -36,14 +37,36 @@ def add_new_course():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
+# This API will delete a course based on its id
+@app.route("/delete_course/<passed_id>", methods=['DELETE'])
+def delete_course(passed_id):
+    # delete from course collection
+    course_collection = pymongo.collection.Collection(configurations.db, 'courses')
+    course_collection.delete_one({'_id': passed_id})
+    # delete from registration collection
+    registration_collection = pymongo.collection.Collection(configurations.db, 'registration')
+    registration_collection.delete_one({'instructorId': passed_id})
+    return "deleted"
+
+# This API will update course's data 
+@app.route("/update_course/<passed_id>", methods=['PATCH'])
+def update_instructor(passed_id):
+    course_collection = pymongo.collection.Collection(configurations.db, 'students')
+    courseId = passed_id
+    updated_doc = course_collection.update_one({"_id": courseId}, {"$set": request.get_json()})
+    if updated_doc:
+        return "updated"
+    else:
+        flask.abort(404, "Patient Not Found")
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Instructors routes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 # List all availabel instructors info
 @app.route("/instructors_Info", methods=['GET'])
 def instructors_information_all():
     instructors_collection = pymongo.collection.Collection(configurations.db, 'instructors')
     instructors = instructors_collection.find()
     return [Instructor(**instructor).to_json() for instructor in instructors]
-
-########################## :Instructors routes
 
 # Add new instructor
 @app.route('/add_instructor', methods=['POST'])
@@ -60,8 +83,29 @@ def add_instructor():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-########################## :students routes
+# This API will delete a instructor based on its id
+@app.route("/delete_instructor/<passed_id>", methods=['DELETE'])
+def delete_instructor(passed_id):
+    # delete from instructor collection
+    instructor_collection = pymongo.collection.Collection(configurations.db, 'instructors')
+    instructor_collection.delete_one({'_id': passed_id})
+    # delete from patient collection
+    registration_collection = pymongo.collection.Collection(configurations.db, 'registration')
+    registration_collection.delete_one({'instructorId': passed_id})
+    return "deleted"
 
+# This API will update instructor's data 
+@app.route("/update_instructor/<passed_id>", methods=['PATCH'])
+def update_instructor(passed_id):
+    instructor_collection = pymongo.collection.Collection(configurations.db, 'students')
+    instructorId = passed_id
+    updated_doc = instructor_collection.update_one({"_id": instructorId}, {"$set": request.get_json()})
+    if updated_doc:
+        return "updated"
+    else:
+        flask.abort(404, "Patient Not Found")
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% students routes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 # List all availabel students info
 @app.route("/students_Info", methods=['GET'])
@@ -86,7 +130,7 @@ def add_new_student():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-
+# Get student's information based on it's id
 @app.route('/find_student/<search_param>', methods=['GET'])
 def find_student(search_param):
     try:
@@ -109,21 +153,21 @@ def find_student(search_param):
 
 # This API will delete a student based on its id
 @app.route("/delete_student/<passed_id>", methods=['DELETE'])
-def delete_patient(passed_id):
+def delete_student(passed_id):
     # delete from user collection
-    user_collection = pymongo.collection.Collection(configurations.db, 'students')
-    user_collection.delete_one({'_id': passed_id})
+    student_collection = pymongo.collection.Collection(configurations.db, 'students')
+    student_collection.delete_one({'_id': passed_id})
     # delete from patient collection
-    patient_collection = pymongo.collection.Collection(configurations.db, 'registration')
-    patient_collection.delete_one({'studentId': passed_id})
+    registration_collection = pymongo.collection.Collection(configurations.db, 'registration')
+    registration_collection.delete_one({'studentId': passed_id})
     return "deleted"
 
-# This API will update patient's data based on patient id
+# This API will update student's data
 @app.route("/update_student/<passed_id>", methods=['PATCH'])
 def update_student(passed_id):
-    patient_collection = pymongo.collection.Collection(configurations.db, 'students')
-    patientId = passed_id
-    updated_doc = patient_collection.update_one({"_id": patientId}, {"$set": request.get_json()})
+    student_collection = pymongo.collection.Collection(configurations.db, 'students')
+    studentId = passed_id
+    updated_doc = student_collection.update_one({"_id": studentId}, {"$set": request.get_json()})
     if updated_doc:
         return "updated"
     else:
